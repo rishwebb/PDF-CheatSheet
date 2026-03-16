@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CheatSheet Prompt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141418;
+    --surface2: #1c1c22;
+    --border: #2a2a35;
+    --accent: #f5c542;
+    --accent2: #ff6b6b;
+    --accent3: #6bffb8;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --card: #18181f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245,197,66,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,197,66,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(245,197,66,0.12);
+    border: 1px solid rgba(245,197,66,0.3);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 400;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .step.active { color: var(--accent); }
+  .step.done { color: var(--accent3); }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .step.done .step-num {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: #0d0d0f;
+  }
+
+  .step.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d0d0f;
+  }
+
+  .step-line {
+    width: 48px;
+    height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  /* API Key section */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease both;
+    transition: border-color 0.3s;
+  }
+
+  .section:hover { border-color: rgba(245,197,66,0.2); }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,197,66,0.1);
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(245,197,66,0.04);
+  }
+
+  .upload-zone input { display: none; }
+
+  .upload-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+    filter: grayscale(0.4);
+  }
+
+  .upload-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .upload-sub {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .file-selected {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: rgba(107,255,184,0.08);
+    border: 1px solid rgba(107,255,184,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 16px;
+    text-align: left;
+  }
+
+  .file-selected.show { display: flex; }
+
+  .file-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .file-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent3);
+  }
+
+  .file-size {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Config row */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
+
+  .config-item label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  select:focus { border-color: var(--accent); }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-generate:hover:not(:disabled) {
+    background: #ffd04a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(245,197,66,0.3);
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Progress */
+  .progress-section {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .progress-section.show { display: block; }
+
+  .progress-log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 2;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .progress-log .log-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: fadeLeft 0.3s ease both;
+  }
+
+  .log-icon { flex-shrink: 0; }
+  .log-ok { color: var(--accent3); }
+  .log-work { color: var(--accent); }
+  .log-err { color: var(--accent2); }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 6px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Results */
+  .results-section {
+    display: none;
+  }
+
+  .results-section.show { display: block; }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .results-title {
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .results-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .btn-copy-all {
+    background: rgba(245,197,66,0.12);
+    border: 1px solid rgba(245,197,66,0.3);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-copy-all:hover {
+    background: rgba(245,197,66,0.2);
+  }
+
+  .btn-download {
+    background: rgba(107,255,184,0.1);
+    border: 1px solid rgba(107,255,184,0.25);
+    color: var(--accent3);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-download:hover { background: rgba(107,255,184,0.18); }
+
+  .prompt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .prompt-card:hover { border-color: rgba(245,197,66,0.25); }
+
+  .prompt-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--surface2);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .part-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .part-num {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #0d0d0f;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .part-title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .part-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-copy-one {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-copy-one:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-copy-one.copied {
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  .chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.3s;
+    margin-left: 6px;
+  }
+
+  .chevron.open { transform: rotate(180deg); }
+
+  .prompt-body {
+    padding: 20px;
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .prompt-body.show { display: block; }
+
+  .prompt-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #c5c5d8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--accent3);
+    color: #0d0d0f;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Error box */
+  .error-box {
+    display: none;
+    background: rgba(255,107,107,0.08);
+    border: 1px solid rgba(255,107,107,0.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--accent2);
+    font-size: 13px;
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .error-box.show { display: block; }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(13,13,15,0.4);
+    border-top-color: #0d0d0f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">✦ AI-Powered Tool</div>
+    <h1>PDF → <span>CheatSheet</span><br>Prompt Generator</h1>
+    <p class="subtitle">Upload your study PDF. Get perfectly sized Gemini prompts to generate handwritten cheat sheets — one per topic.</p>
+  </header>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step1">
+      <div class="step-num">1</div>
+      <span>Setup</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <span>Upload</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step3">
+      <div class="step-num">3</div>
+      <span>Configure</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step4">
+      <div class="step-num">4</div>
+      <span>Prompts</span>
+    </div>
+  </div>
+
+  <!-- API Key -->
+  <div class="section" style="animation-delay:0.1s">
+    <div class="section-label">Step 1 — Anthropic API Key</div>
+    <input type="password" id="apiKey" placeholder="sk-ant-api03-..." />
+    <p style="font-size:12px; color:var(--muted); margin-top:8px; font-family:'JetBrains Mono',monospace;">
+      🔒 Key stays in your browser. Never sent anywhere except Anthropic's API.
+    </p>
+  </div>
+
+  <!-- Upload -->
+  <div class="section" style="animation-delay:0.2s">
+    <div class="section-label">Step 2 — Upload PDF</div>
+    <label class="upload-zone" id="dropZone">
+      <input type="file" id="pdfInput" accept=".pdf" />
+      <span class="upload-icon">📄</span>
+      <div class="upload-title">Drop your PDF here</div>
+      <div class="upload-sub">or click to browse — max 20MB</div>
+    </label>
+    <div class="file-selected" id="fileSelected">
+      <span class="file-icon">✅</span>
+      <div>
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-size" id="fileSize">—</div>
+      </div>
+    </div>
+    <div class="error-box" id="uploadError"></div>
+  </div>
+
+  <!-- Config -->
+  <div class="section" style="animation-delay:0.3s">
+    <div class="section-label">Step 3 — Configure</div>
+    <div class="config-grid">
+      <div class="config-item">
+        <label>Cheat sheet style</label>
+        <select id="styleSelect">
+          <option value="handwritten">Human Handwriting — Multi-coloured pens</option>
+          <option value="notes">Study Notes — Bullet + diagrams</option>
+          <option value="mindmap">Mind Map — Central topic + branches</option>
+        </select>
+      </div>
+      <div class="config-item">
+        <label>Image orientation</label>
+        <select id="orientSelect">
+          <option value="landscape">Landscape (A4 wide)</option>
+          <option value="portrait">Portrait (A4 tall)</option>
+        </select>
+      </div>
+      <div class="config-item">
+        <label>Content density per part</label>
+        <select id="densitySelect">
+          <option value="medium">Medium — fits 1 Gemini page comfortably</option>
+          <option value="light">Light — very spacious, easy to read</option>
+          <option value="dense">Dense — pack as much as possible</option>
+        </select>
+      </div>
+      <div class="config-item">
+        <label>Subject area (optional hint)</label>
+        <input type="text" id="subjectHint" placeholder="e.g. Biology, History, Python..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate -->
+  <div class="section" style="animation-delay:0.4s; padding: 20px 28px;">
+    <button class="btn-generate" id="generateBtn" onclick="startGeneration()">
+      ✦ Generate Cheat Sheet Prompts
+    </button>
+    <div class="error-box" id="genError"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section" id="progressSection">
+    <div class="section-label">Processing</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    <div class="progress-log" id="progressLog"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <div>
+        <div class="results-title">Your Prompts are Ready ✦</div>
+        <div class="results-meta" id="resultsMeta">— parts generated</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn-copy-all" onclick="copyAll()">📋 Copy All</button>
+        <button class="btn-download" onclick="downloadTxt()">⬇ Download .txt</button>
+      </div>
+    </div>
+    <div id="promptList"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────
+let pdfFile = null;
+let generatedParts = [];
+
+// ──────────────────────────────────────────────
+// File Upload Handling
+// ──────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const pdfInput = document.getElementById('pdfInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+pdfInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+function handleFile(f) {
+  const errBox = document.getElementById('uploadError');
+  errBox.className = 'error-box';
+
+  if (!f.name.endsWith('.pdf')) {
+    showErr(errBox, '❌ Please upload a PDF file.');
+    return;
+  }
+  if (f.size > 20 * 1024 * 1024) {
+    showErr(errBox, '❌ File too large. Maximum size is 20MB.');
+    return;
+  }
+
+  pdfFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = formatBytes(f.size);
+  document.getElementById('fileSelected').classList.add('show');
+  markStep(2);
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+  return (b / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+// ──────────────────────────────────────────────
+// Step tracker
+// ──────────────────────────────────────────────
+function markStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step' + i);
+    el.className = 'step';
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+}
+
+// ──────────────────────────────────────────────
+// Logging
+// ──────────────────────────────────────────────
+function log(msg, type = 'work') {
+  const log = document.getElementById('progressLog');
+  const icons = { work: '⟳', ok: '✓', err: '✗' };
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = `<span class="log-icon log-${type}">${icons[type]}</span><span>${msg}</span>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setProgress(pct) {
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function showErr(el, msg) {
+  el.className = 'error-box show';
+  el.textContent = msg;
+}
+
+// ──────────────────────────────────────────────
+// PDF Text Extraction (via FileReader + pdfjs)
+// ──────────────────────────────────────────────
+async function extractPdfText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        let fullText = '';
+        const totalPages = pdf.numPages;
+
+        for (let i = 1; i <= totalPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(' ');
+          fullText += `\n[PAGE ${i}]\n${pageText}\n`;
+          setProgress(5 + (i / totalPages) * 25);
+        }
+
+        resolve({ text: fullText, pages: totalPages });
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ──────────────────────────────────────────────
+// Claude API call
+// ──────────────────────────────────────────────
+async function callClaude(apiKey, systemPrompt, userMsg, maxTokens = 4000) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
+// ──────────────────────────────────────────────
+// Main Generation Flow
+// ──────────────────────────────────────────────
+async function startGeneration() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const genError = document.getElementById('genError');
+  genError.className = 'error-box';
+
+  if (!apiKey) return showErr(genError, '❌ Please enter your Anthropic API key.');
+  if (!pdfFile) return showErr(genError, '❌ Please upload a PDF file first.');
+
+  const style = document.getElementById('styleSelect').value;
+  const orient = document.getElementById('orientSelect').value;
+  const density = document.getElementById('densitySelect').value;
+  const subject = document.getElementById('subjectHint').value.trim();
+
+  // UI state
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Processing…';
+
+  document.getElementById('progressSection').classList.add('show');
+  document.getElementById('progressLog').innerHTML = '';
+  document.getElementById('resultsSection').className = 'results-section';
+  setProgress(0);
+  markStep(4);
+
+  try {
+    // Step 1: Extract text
+    log('Extracting text from PDF…');
+    const { text: rawText, pages } = await extractPdfText(pdfFile);
+    log(`Extracted ${pages} pages of content`, 'ok');
+    setProgress(30);
+
+    // Step 2: Ask Claude to split intelligently
+    log('Analysing content structure & splitting into parts…');
+    const densityMap = {
+      light: '150–200 lines',
+      medium: '220–280 lines',
+      dense: '320–380 lines'
+    };
+    const targetLines = densityMap[density];
+
+    const splitSystem = `You are an expert academic content organiser. Your job is to split raw extracted PDF text into logical study sections.
+
+Rules:
+1. Never cut a topic in the middle — always finish the topic before splitting.
+2. Each part should be roughly ${targetLines} of content (count estimated wrapped lines at ~80 chars/line).
+3. Aim for roughly equal part sizes, adjusting only to respect rule #1.
+4. Return ONLY valid JSON — no preamble, no markdown fences.
+5. Format: {"parts": [{"part_number": 1, "title": "Topic Title", "content": "full text of this part..."}, ...]}
+6. Keep ALL the original content — don't summarise or skip anything.`;
+
+    const splitResult = await callClaude(
+      apiKey,
+      splitSystem,
+      `Here is the extracted text from a ${pages}-page PDF${subject ? ` about ${subject}` : ''}. Split it into logical parts:\n\n${rawText.substring(0, 48000)}`,
+      4096
+    );
+
+    let parsed;
+    try {
+      // Strip any accidental fences
+      const clean = splitResult.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch (e) {
+      throw new Error('Failed to parse split result. Try again or reduce PDF size.');
+    }
+
+    const parts = parsed.parts;
+    log(`Split into ${parts.length} parts successfully`, 'ok');
+    setProgress(55);
+
+    // Step 3: Generate image prompt for each part
+    log('Generating Gemini image prompts…');
+
+    const styleDescriptions = {
+      handwritten: 'realistic human handwriting with multiple coloured pens — blue ink for main content, red for key terms/headings, green for examples/formulas, orange for important notes, purple for definitions. The writing should look natural, slightly imperfect, with occasional underlines, circles, stars, and arrows typical of good student notes',
+      notes: 'neat study notes style with clear bullet points, numbered lists, simple hand-drawn diagrams and box highlights. Use blue for main text, red for headings, green for examples',
+      mindmap: 'a hand-drawn mind map with the central topic in the middle, branches radiating outward. Each branch uses a different coloured pen. Sub-branches with examples and details'
+    };
+
+    const orientDesc = orient === 'landscape'
+      ? 'landscape orientation (wider than tall, like A4 rotated), 16:9 or 4:3 wide format'
+      : 'portrait orientation (taller than wide, standard A4 format)';
+
+    const promptSystem = `You are a Gemini image prompt specialist. You write detailed, specific image generation prompts for creating study cheat sheets.
+Each prompt must:
+- Be self-contained and ready to paste directly into Gemini image generation
+- Specify the style, layout, orientation, and ALL the actual content to include
+- Include every key concept, definition, formula, or example from the provided text
+- Be formatted as a single flowing paragraph (no headers, no lists in the prompt itself)
+Return ONLY the prompt text. No preamble. No explanation.`;
+
+    const finalParts = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      log(`Writing prompt for Part ${part.part_number}: ${part.title}…`);
+
+      const imagePrompt = await callClaude(
+        apiKey,
+        promptSystem,
+        `Write a Gemini image generation prompt for a cheat sheet covering this content.
+
+Style: ${styleDescriptions[style]}
+Orientation: ${orientDesc}
+Part: ${part.part_number} of ${parts.length}
+Topic: ${part.title}
+${subject ? `Subject: ${subject}` : ''}
+
+Content to include in the cheat sheet:
+${part.content.substring(0, 6000)}`,
+        1200
+      );
+
+      finalParts.push({
+        number: part.part_number,
+        title: part.title,
+        prompt: imagePrompt.trim(),
+        lines: Math.round(part.content.length / 80)
+      });
+
+      setProgress(55 + ((i + 1) / parts.length) * 40);
+    }
+
+    log(`All ${finalParts.length} prompts generated!`, 'ok');
+    setProgress(100);
+
+    generatedParts = finalParts;
+    renderResults(finalParts);
+
+  } catch (err) {
+    log('Error: ' + err.message, 'err');
+    showErr(genError, '❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✦ Generate Cheat Sheet Prompts';
+  }
+}
+
+// ──────────────────────────────────────────────
+// Render Results
+// ──────────────────────────────────────────────
+function renderResults(parts) {
+  const section = document.getElementById('resultsSection');
+  section.className = 'results-section show';
+  document.getElementById('resultsMeta').textContent =
+    `${parts.length} parts generated — copy each prompt into Gemini Image Generation`;
+
+  const list = document.getElementById('promptList');
+  list.innerHTML = '';
+
+  parts.forEach((part, idx) => {
+    const card = document.createElement('div');
+    card.className = 'prompt-card';
+    card.style.animationDelay = (idx * 0.07) + 's';
+    card.innerHTML = `
+      <div class="prompt-card-header" onclick="toggleCard(${idx})">
+        <div class="part-label">
+          <div class="part-num">${part.number}</div>
+          <div>
+            <div class="part-title">${part.title}</div>
+            <div class="part-meta">~${part.lines} lines of content</div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-copy-one" id="copy-btn-${idx}" onclick="copyOne(event, ${idx})">Copy</button>
+          <span class="chevron" id="chevron-${idx}">▼</span>
+        </div>
+      </div>
+      <div class="prompt-body" id="body-${idx}">
+        <div class="prompt-text">${escHtml(part.prompt)}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  // Scroll to results
+  setTimeout(() => {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+function toggleCard(idx) {
+  const body = document.getElementById('body-' + idx);
+  const chevron = document.getElementById('chevron-' + idx);
+  const isOpen = body.classList.contains('show');
+  body.className = isOpen ? 'prompt-body' : 'prompt-body show';
+  chevron.className = isOpen ? 'chevron' : 'chevron open';
+}
+
+function copyOne(e, idx) {
+  e.stopPropagation();
+  const part = generatedParts[idx];
+  navigator.clipboard.writeText(part.prompt).then(() => {
+    const btn = document.getElementById('copy-btn-' + idx);
+    btn.textContent = 'Copied!';
+    btn.className = 'btn-copy-one copied';
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.className = 'btn-copy-one';
+    }, 2000);
+  });
+}
+
+function copyAll() {
+  const all = generatedParts.map((p, i) =>
+    `═══════════════════════════════════════\nPART ${p.number}: ${p.title}\n═══════════════════════════════════════\n\n${p.prompt}`
+  ).join('\n\n');
+  navigator.clipboard.writeText(all).then(() => showToast('All prompts copied!'));
+}
+
+function downloadTxt() {
+  const all = generatedParts.map((p) =>
+    `═══════════════════════════════════════\nPART ${p.number}: ${p.title}\n═══════════════════════════════════════\n\n${p.prompt}`
+  ).join('\n\n\n');
+  const blob = new Blob([all], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cheatsheet-prompts.txt';
+  a.click();
+  showToast('Downloaded!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Step watcher — mark step 3 when config is touched
+document.getElementById('styleSelect').addEventListener('change', () => markStep(3));
+document.getElementById('apiKey').addEventListener('input', () => markStep(1));
+</script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+</body>
+</html>
